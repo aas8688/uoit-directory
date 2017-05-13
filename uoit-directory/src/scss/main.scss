@@ -5,19 +5,26 @@ $text-color-white: #fff;
 $text-color-black: #151515;
 $accordion-item-background-hover: #0077CA;
 $lightgrey : #F6F7F7;
-<<<<<<< HEAD:uoit-directory/src/scss/main.scss
+$error : pink;
 
 .activeFilterBtn {
 		background-color: $dark-blue;
 }
-=======
->>>>>>> origin/moyagoleski/master:uoit-directory/assets/scss/main.scss
 
 .tabs {
 	.tabs-title {
 		text-align: center;
 		> a {
 			padding: 10px;
+		}
+		@media screen and (min-width:75em) {
+			/* responsive tabs title width */
+				width: 33%;
+				margin-right: 0.5%;
+
+			&:last-child {
+				margin-right: 0;
+			}
 		}
 	}
 }
@@ -37,7 +44,7 @@ $lightgrey : #F6F7F7;
 }
 
 .accordion {
-	.accordion-item {
+	&-item {
 		margin: 1rem 0;
 
 		.accordion-title {
@@ -52,10 +59,6 @@ $lightgrey : #F6F7F7;
 				color: $text-color-white;
 			}
 		}
-		/* clear default border*/
-		// :last-child:not(.is-active) > .accordion-title {
-		// 	// border: 0;
-		// }
 
 		.a-content {
 		// .accordion-content {
@@ -154,17 +157,18 @@ $lightgrey : #F6F7F7;
 	cursor: default;
 }
 
-@media screen and (min-width:75em) {
-	/* responsive tabs title width */
-	.tabs .tabs-title {
-		width: 33%;
-		margin-right: 0.5%;
-	}
+// @media screen and (min-width:75em) {
+// 	/* responsive tabs title width */
+// 	.tabs .tabs-title {
+// 		width: 33%;
+// 		margin-right: 0.5%;
+// 	}
+//
+// 	.tabs-title:last-child {
+// 		margin-right: 0;
+// 	}
+// }
 
-	.tabs-title:last-child {
-		margin-right: 0;
-	}
-}
 @media screen and (max-width: 43em) {
 	/* set min-height in case accordion title overflow*/
 	.accordion {
@@ -203,7 +207,6 @@ $lightgrey : #F6F7F7;
 	}
 }
 
-<<<<<<< HEAD:uoit-directory/src/scss/main.scss
 // icon arrow down - search tab
 .icon_arrow_down {
 	color: $light-blue;
@@ -232,8 +235,12 @@ $lightgrey : #F6F7F7;
     transform: translateY(15px);
   }
 }
-=======
->>>>>>> origin/moyagoleski/master:uoit-directory/assets/scss/main.scss
+
+input.ng-invalid.ng-touched {
+  background-color: $error;
+}
+
+// COLOUR TABS
 
 /* tabs title nav color*/
 /* .tabs {*/

@@ -1,98 +1,137 @@
 // controller
-app.controller('searchCtrl', ['$scope', '$filter', 'usersService', function($scope, $filter, usersService) {
-    usersService.get().then(function(response) {
-        // push person info to users array;
-        $scope.users = response.data.query_info.person_info;
+console.clear();
 
-        // create empty departments array
+app.component('directorySearch', {
+    controller: 'searchCtrl',
+    // `templateUrl` IS FROM <script type="text/ng-template"> IN HTML
+    // CAN ALSO BE THE URL TO A REGULAR OLD HTML FILE
+    // OR gulp-angular-templatecache INJECTED
+    templateUrl: '/dist/template/template.html'
+});
+
+app.controller('searchCtrl', function($scope, $filter, $http, usersService) {
+
+    var ctrl = this; // ASSIGN `this` TO A VARIABLE FOR USE INSIDE FUNCTIONS
+
+    ctrl.$onInit = function() { // MOVE INIT LOGIC INTO AN `$onInit` HOOK
+
+        // QUICK HACK FOR GETTING TABS WORKING INSIDE INIT
+        // NORMALLY THIS WOULD NOT BE DONE WITH JQUERY, BUT THERE'S NO TIME!
+        var tabs = new Foundation.Tabs($('#tab1'));
+
         $scope.departments = [];
-
-        // regex replace '&','UOIT','g'
-        var regex = /-|UOIT|/g;
-        var regex2 = /&/g;
-
-        for (var i in $scope.users) {
-
-            // replace '&','UOIT','g'
-            $scope.users[i].dirschl_school_name = $scope.users[i].dirschl_school_name.replace(regex, "");
-            $scope.users[i].dirschl_school_name = $scope.users[i].dirschl_school_name.replace(regex2, "and");
-
-            // store department in departments array
-            $scope.departments[i] = response.data.query_info.person_info[i].dirschl_school_name;
-        }
-
-        // remove departments duplicates from departments array (dirschl_school_name) 64 left
-        $scope.departments = $scope.departments.filter(function(elem, index, self) {
-            return index == self.indexOf(elem);
-        });
-        // sort departments array
-        $scope.departments.sort();
+        $scope.users = [];
 
         $scope.currentPage = 0;
-        $scope.pageSize = 10;
+        $scope.pageSize = 7;
 
-        // get filtered data
-        $scope.getData = function() {
-            return $filter('filter')($scope.users, $scope.searchName);
-        };
+        // MAKE SURE THE LIST LOOKS THE WAY THE CONTROLLER NEEDS IT TO
+        // BEFORE IT GETS THERE, I.E. DO FILTERING IN SERVICE AND RETURN `users`
+        usersService.getUsers().then(function(users) {
+            $scope.users = users;
+        });
+        // SAME WITH DEPARTMENTS
+        usersService.getDepts().then(function(depts) {
+            $scope.departments = depts;
+        });
 
-        $scope.numberOfPages = function() {
-            return Math.ceil($scope.getData().length / $scope.pageSize);
-        };
+    }
 
-    });
-
-    // remove searchResult (.callout) by setting filter searchName default
-    $scope.removeSearchResult = function() {
+    // MAKE `$scope` METHODS INTO CONTROLLER METHODS
+    // ASSIGN THEM TO OUR `ctrl` VARIABLE INSTEAD OF `$scope`, I.E. `this`
+    // USE THEM IN HTML WITH `ng-click="$ctrl.removeSearchResult()"`
+    // TRY TO COMPLETELY REMOVE `$scope` FROM CONTROLLER AND HTML
+    ctrl.removeSearchResult = function() {
         $scope.searchName = {};
     };
-}]);
 
-// pagination function
+    // MODIFY SEARCH RESULT
+    // RESET CURRENT PAGE
+    // CLEAR DROPDOWN LIST
+    ctrl.modifyResultResetDropdown = function() {
+        $scope.currentPage = 0;
+        $scope.searchName.dirschl_school_name = '';
+    }
+
+    // RESET CURRENT PAGE
+    // CLEAR INPUT FIELD
+    ctrl.modifyResultClearInput = function() {
+        $scope.currentPage = 0;
+        $scope.searchName.dirpepl_first_name = '';
+        $scope.searchName.dirpepl_last_name = '';
+    }
+
+    // PASS ORDERBY PARAMETER
+    // AND CHANGE ACTIVE FILTER BUTTON
+    ctrl.sortBy = function(propertyName) {
+        $scope.propertyName = propertyName;
+        $scope.order = propertyName;
+    };
+
+
+    ctrl.smoothScroll = function() {
+        // alert("CLICK!");
+        $('html,body').animate({ scrollTop: $("#angularSearch").offset().top }, 'slow');
+    };
+
+    // GIVE REUSABLE CHUNKS THEIR OWN METHODS
+    // TRY TO AVOID `ng-click="page = 1; fun = true; etc"`
+    ctrl.changePageAndScroll = function(plusOrMinus) {
+        $scope.currentPage = $scope.currentPage + plusOrMinus;
+        ctrl.smoothScroll()
+    }
+
+    // GET FILTERED DATA
+    ctrl.getData = function() {
+        return $filter('filter')($scope.users, $scope.searchName);
+    };
+
+    // GET PAGES NUMBER
+    ctrl.numberOfPages = function() {
+        return Math.ceil(ctrl.getData().length / $scope.pageSize);
+    };
+
+    // // process the form
+    $scope.processForm = function() {
+
+      alert("submited");
+
+      $http({
+      method  : 'POST',
+      url     : 'mail.php',
+      data    : $.param($scope.formData),  // pass in data as strings
+      headers : { 'Content-Type': 'application/x-www-form-urlencoded' }  // set the headers so angular passing info as form data (not request payload)
+     })
+
+     .then(function successCallback(response) {
+        // this callback will be called asynchronously
+        // when the response is available
+        alert("success");
+        console.log($scope.formData);
+
+        $scope.message = "Your form was submited successfully.";
+
+        // CLEARS FORM :D
+        $scope.updateForm.$setUntouched();
+        $scope.formData = {};
+
+
+      }, function errorCallback(response) {
+        // called asynchronously if an error occurs
+        // or server returns response with an error status.
+        alert("error");
+        $scope.message = "Your form was NOT submited successfully.";
+
+      });
+
+
+    };
+
+});
+
 app.filter('startFrom', function() {
     return function(input, start) {
         start = +start; //parse to int
         return input.slice(start);
     }
 });
-
-
-// does not repeat in departments in dropdown
-// app.filter('unique', function () {
-//
-//     return function (items, filterOn) {
-//
-//         if (filterOn === false) {
-//             return items;
-//         }
-//
-//         if ((filterOn || angular.isUndefined(filterOn)) && angular.isArray(items)) {
-//             var hashCheck = {}, newItems = [];
-//
-//             var extractValueToCompare = function (item) {
-//                 if (angular.isObject(item) && angular.isString(filterOn)) {
-//                     return item[filterOn];
-//                 } else {
-//                     return item;
-//                 }
-//             };
-//
-//             angular.forEach(items, function (item) {
-//                 var valueToCheck, isDuplicate = false;
-//
-//                 for (var i = 0; i < newItems.length; i++) {
-//                     if (angular.equals(extractValueToCompare(newItems[i]), extractValueToCompare(item))) {
-//                         isDuplicate = true;
-//                         break;
-//                     }
-//                 }
-//                 if (!isDuplicate) {
-//                     newItems.push(item);
-//                 }
-//
-//             });
-//             items = newItems;
-//         }
-//         return items;
-//     };
-// });
