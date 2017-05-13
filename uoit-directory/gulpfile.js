@@ -50,54 +50,16 @@ gulp.task('annotation', function() {
     return gulp.src('src/service.js')
         .pipe(ngAnnotate())
         .pipe(gulp.dest('src/js'));
-})
+});
 
 gulp.task('minify', ['annotation'], function() {
     return gulp.src('src/js/**/*.js')
         .pipe(ngAnnotate())
         .pipe(uglify())
         .pipe(concat('all.min.js'))
-        .pipe(gulp.dest('dist/js/'))
+        .pipe(gulp.dest('dist/js/'));
 });
 
-
-// gulp.task('template', function() {
-//     return gulp.src('src/template/**/*.html')
-//         // .pipe(htmlmin({ collapseWhitespace: true }))
-//         .pipe(htmlmin({ collapseWhitespace: true, removeEmptyAttributes: true }))
-//         .pipe(templateCache({
-//             module: 'directorySearch',
-//             standalone: true
-//         }))
-//         .pipe(gulp.dest('dist/js'));
-// });
-
-// gulp.task('template', function() {
-//     return gulp.src('src/template/**/*.thml')
-//         .pipe(htmlmin({ removeEmptyAttributes: true }))
-//         .pipe(templateCache())
-//         .pipe(gulp.src('dist/js'));
-// });
-
-// gulp.task('minify', function() {  
-//     return gulp.src(['js/appService.js','js/app.js']) //注意，此处特意如此，避免顺序导致的问题
-//         .pipe(ngAnnotate())
-//         .pipe(ngmin({dynamic: false}))  
-//         .pipe(stripDebug())  
-//         .pipe(uglify({outSourceMap: false}))  
-//         .pipe(concat('all.min.js'))  
-//         .pipe(gulp.dest('js/'))  
-// });   
-
-gulp.task('js-task', function() {
-    return gulp.src('src/js/**/*.js')
-        .pipe(sourcemaps.init())
-        .pipe(gulp.dest('./dist/js'))
-        .pipe(sourcemaps.write('dist'))
-        .pipe(notify({
-            message: 'Scripts task complete'
-        }));
-});
 
 gulp.task('watch', function() {
     gulp.watch('src/**/*.html', ['html-task']);
